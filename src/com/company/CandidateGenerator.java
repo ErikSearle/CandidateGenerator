@@ -10,7 +10,20 @@ public class CandidateGenerator {
         LinkedHashSet<TreeSet<Integer>> newCandidates = new LinkedHashSet<>();
 
         Object[] candidates = candidatePool.toArray();
+        if(candidates.length == 0){
+            return newCandidates;
+        }
+
         int sizeOfNewCandidates = ((TreeSet<Integer>) candidates[0]).size() + 1;
+
+        /*
+        Check to see if a there are even enough candidates in the set to produce a new candidate. This also avoid a null
+        pointer exception
+         */
+        if(sizeOfNewCandidates > candidates.length){
+            return newCandidates;
+        }
+
         int[] pointers = new int[sizeOfNewCandidates];
         for(int i=0; i<sizeOfNewCandidates; i++){
             pointers[i] = i;

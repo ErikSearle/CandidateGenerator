@@ -2,30 +2,23 @@ package com.company;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.Scanner;
-import java.util.TreeSet;
-import java.util.function.Consumer;
+import java.util.TreeMap;
 
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("Candidate Generator");
-        LinkedHashSet<TreeSet<Integer>> candidates = parseFile("/home/erik/workspace/CandidateGenerator/sample_candidates.txt");
-        LinkedHashSet<TreeSet<Integer>> newCandidates = CandidateGenerator.generate(candidates);
-        newCandidates.forEach(new Consumer<TreeSet<Integer>>() {
-            @Override
-            public void accept(TreeSet<Integer> integers) {
-                StringBuilder sb = new StringBuilder();
-                for(Integer integer : integers){
-                    sb.append(integer).append(" ");
-                }
-                System.out.println(sb.toString());
-            }
-        });
+        TreeMap<int[], Integer> candidates = parseFile("/home/erik/workspace/SampleGenerator/sample_candidates.txt");
+        TreeMap<int[], Integer> newCandidates = CandidateGenerator.generate(candidates);
+        System.out.println(newCandidates.size());
+//        for(int[] candidate: newCandidates.keySet()){
+//            for(int i: candidate) System.out.print(i + " ");
+//            System.out.print("\n");
+//        }
     }
 
-    private static LinkedHashSet<TreeSet<Integer>> parseFile(String inputFileName){
+    private static TreeMap<int[], Integer> parseFile(String inputFileName){
         Scanner reader = null;
         try{
             reader = new Scanner(new File(inputFileName));
@@ -34,15 +27,15 @@ public class Main {
             System.exit(1);
         }
 
-        LinkedHashSet<TreeSet<Integer>> candidatePool = new LinkedHashSet<>();
+        TreeMap<int[], Integer> candidatePool = new TreeMap<>(new IntArrayComparatorItemWise());
         while(reader.hasNextLine()){
             String candidateData = reader.nextLine();
-            TreeSet<Integer> candidate = new TreeSet<>();
             String[] splitData = candidateData.split(" ");
-            for(String datum : splitData){
-                candidate.add(Integer.valueOf(datum));
+            int[] candidate = new int[splitData.length];
+            for(int i=0; i<candidate.length; i++){
+                candidate[i] = Integer.valueOf(splitData[i]);
             }
-            candidatePool.add(candidate);
+            candidatePool.put(candidate, 0);
         }
         return candidatePool;
     }

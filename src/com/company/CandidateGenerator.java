@@ -1,9 +1,17 @@
 package com.company;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class CandidateGenerator {
 
+    /**
+     * A method for generating potential candidates for the Apriori data mining algorithm. This program will only return
+     * candidates for which all of their potential size k subsets exist in l1
+     * @param l1 Candidates of size k
+     * @return Candidates of size k+1
+     */
     public static TreeMap<int[], Integer> generate(TreeMap<int[], Integer> l1){
         TreeSet<int[]> potentialC2 = new TreeSet<>(new IntArrayComparatorItemWise());
         Object[] keyArray = l1.keySet().toArray();
@@ -32,56 +40,12 @@ public class CandidateGenerator {
         return returnable;
     }
 
-//    public static LinkedHashSet<TreeSet<Integer>> generate(LinkedHashSet<TreeSet<Integer>> candidatePool){
-//        LinkedHashSet<TreeSet<Integer>> newCandidates = new LinkedHashSet<>();
-//
-//        Object[] candidates = candidatePool.toArray();
-//        if(candidates.length == 0){
-//            return newCandidates;
-//        }
-//
-//        int sizeOfNewCandidates = ((TreeSet<Integer>) candidates[0]).size() + 1;
-//
-//        System.out.println("Building candidates of size " + sizeOfNewCandidates);
-//
-//        /*
-//        Check to see if a there are even enough candidates in the set to produce a new candidate. This also avoid a null
-//        pointer exception
-//         */
-//        if(sizeOfNewCandidates > candidates.length){
-//            return newCandidates;
-//        }
-//
-//        int[] pointers = new int[sizeOfNewCandidates];
-//        for(int i=0; i<sizeOfNewCandidates; i++){
-//            pointers[i] = i;
-//        }
-//
-//        do{
-//            HashSet<Integer> potentialCandidate = new HashSet<>();
-//            for(int i=0; i<sizeOfNewCandidates; i++){
-//                potentialCandidate.addAll((TreeSet<Integer>) candidates[pointers[i]]);
-//            }
-//            if(potentialCandidate.size() == sizeOfNewCandidates) newCandidates.add(new TreeSet<>(potentialCandidate));
-//        }while(iteratePointers(pointers, candidates.length-1));
-//
-//        return newCandidates;
-//    }
-
-//    public static boolean iteratePointers(int[] pointers, int pointerMax){
-//        for(int i=pointers.length - 1; i>=0; i--){
-//            if(pointers[i] < pointerMax - (pointers.length - 1 - i)){
-//                pointers[i]++;
-//                for(int j=1; j+i < pointers.length; j++){
-//                    pointers[i+j] = pointers[i] + j;
-//                }
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
+    /**
+     * A helper method that checks if two int arrays differ only by the last item
+     * @param first an int array
+     * @param second a second int array
+     * @return boolean
+     */
     private static boolean shareAllButLast(Object first, Object second){
         int[] castFirst = (int[]) first;
         int[] castSecond = (int[]) second;
@@ -91,6 +55,13 @@ public class CandidateGenerator {
         return true;
     }
 
+    /**
+     * A helper method that takes two arrays and builds a third array which is larger than the first array by one, and
+     * contains all elements cnotained in the first array plus teh last element of the second array
+     * @param first an n sized int array
+     * @param last an int array
+     * @return an n+1 sized int array
+     */
     private static int[] buildPotentialCandidate(Object first, Object last){
         int[] castFirst = (int[]) first;
         int[] castLast = (int[]) last;
@@ -103,6 +74,13 @@ public class CandidateGenerator {
         return returnable;
     }
 
+    /**
+     * A helper method which checks that for each potential candidate of size k+1, all possible subsets of size k exist
+     * in l1. If one or more of the subsets does not exist, the potential candidate is removed. nothing is returned as
+     * the potCan set is modified directly.
+     * @param potCan TreeSet of potential size k+1 candidates
+     * @param l1 TreeMap of size k candidates
+     */
     private static void pruneCandidates(TreeSet<int[]> potCan, TreeMap<int[], Integer> l1){
         if(potCan.isEmpty()) return;
         if(potCan.first().length == 2) return;
@@ -121,5 +99,50 @@ public class CandidateGenerator {
             }
         }
         for(int[] can: cansToRemove) potCan.remove(can);
+    }
+
+
+    /**
+     * A main method for testing the candidate generation program. This only exists as a method in teh class because the
+     * requirements for the assignment were that it be all contained in a single file. Ideally, this would be in a
+     * separate class file.
+     * @param args Command line arguments. args[0] should contain the path the the sample file
+     */
+    public static void main(String[] args) {
+        System.out.println("Candidate Generator");
+        TreeMap<int[], Integer> candidates = parseFile(args[0]);
+        TreeMap<int[], Integer> newCandidates = CandidateGenerator.generate(candidates);
+        for(int[] candidate: newCandidates.keySet()){
+            for(int i: candidate) System.out.print(i + " ");
+            System.out.print("\n");
+        }
+    }
+
+    /**
+     * A helper method which parses the file into the correct data structure for candidate generation
+     * @param inputFileName A string denoting the path to the correct file
+     * @return A TreeMap<int[], Integer> containing all of the potential candidates of size k. The Integer in the map is
+     * not used in candidate generation but is there to play nicely with the Apriori section of code
+     */
+    private static TreeMap<int[], Integer> parseFile(String inputFileName){
+        Scanner reader = null;
+        try{
+            reader = new Scanner(new File(inputFileName));
+        } catch(IOException e){
+            System.out.println("Unable to open file");
+            System.exit(1);
+        }
+
+        TreeMap<int[], Integer> candidatePool = new TreeMap<>(new IntArrayComparatorItemWise());
+        while(reader.hasNextLine()){
+            String candidateData = reader.nextLine();
+            String[] splitData = candidateData.split(" ");
+            int[] candidate = new int[splitData.length];
+            for(int i=0; i<candidate.length; i++){
+                candidate[i] = Integer.valueOf(splitData[i]);
+            }
+            candidatePool.put(candidate, 0);
+        }
+        return candidatePool;
     }
 }

@@ -7,6 +7,13 @@ public class IntArrayComparatorItemWise implements Comparator<int[]> {
 
     public IntArrayComparatorItemWise(){}
 
+    /**
+     * A comparator that compares two int arrays by the items inside. If one array of size k has items exactly equal to
+     * the first k items in an array of size >k, the larger array is determined to be greater.
+     * @param ints
+     * @param t1
+     * @return
+     */
     @Override
     public int compare(int[] ints, int[] t1) {
         for(int i=0; i<ints.length && i<t1.length; i++){

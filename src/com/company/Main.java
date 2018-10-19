@@ -9,13 +9,12 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Candidate Generator");
-        TreeMap<int[], Integer> candidates = parseFile("/home/erik/workspace/SampleGenerator/sample_candidates.txt");
+        TreeMap<int[], Integer> candidates = parseFile(args[0]);
         TreeMap<int[], Integer> newCandidates = CandidateGenerator.generate(candidates);
-        System.out.println(newCandidates.size());
-//        for(int[] candidate: newCandidates.keySet()){
-//            for(int i: candidate) System.out.print(i + " ");
-//            System.out.print("\n");
-//        }
+        for(int[] candidate: newCandidates.keySet()){
+            for(int i: candidate) System.out.print(i + " ");
+            System.out.print("\n");
+        }
     }
 
     private static TreeMap<int[], Integer> parseFile(String inputFileName){

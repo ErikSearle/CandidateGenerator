@@ -12,8 +12,8 @@ public class CandidateGenerator {
      * @param l1 Candidates of size k
      * @return Candidates of size k+1
      */
-    public static TreeMap<int[], Integer> generate(TreeMap<int[], Integer> l1){
-        TreeSet<int[]> potentialC2 = new TreeSet<>(new IntArrayComparatorItemWise());
+    public static TreeMap<Integer[], Integer> generate(TreeMap<Integer[], Integer> l1){
+        TreeSet<Integer[]> potentialC2 = new TreeSet<>(new IntArrayComparatorItemWise());
         Object[] keyArray = l1.keySet().toArray();
 
         int pointer1 = 0;
@@ -35,8 +35,8 @@ public class CandidateGenerator {
 
         pruneCandidates(potentialC2, l1);
 
-        TreeMap<int[], Integer> returnable = new TreeMap<>(new IntArrayComparatorItemWise());
-        for(int[] can: potentialC2) returnable.put(can, 0);
+        TreeMap<Integer[], Integer> returnable = new TreeMap<>(new IntArrayComparatorItemWise());
+        for(Integer[] can: potentialC2) returnable.put(can, 0);
         return returnable;
     }
 
@@ -47,10 +47,10 @@ public class CandidateGenerator {
      * @return boolean
      */
     private static boolean shareAllButLast(Object first, Object second){
-        int[] castFirst = (int[]) first;
-        int[] castSecond = (int[]) second;
+        Integer[] castFirst = (Integer[]) first;
+        Integer[] castSecond = (Integer[]) second;
         for(int i=0; i<castFirst.length-1; i++){
-            if(castFirst[i] != castSecond[i]) return false;
+            if(!castFirst[i].equals(castSecond[i])) return false;
         }
         return true;
     }
@@ -62,11 +62,11 @@ public class CandidateGenerator {
      * @param last an int array
      * @return an n+1 sized int array
      */
-    private static int[] buildPotentialCandidate(Object first, Object last){
-        int[] castFirst = (int[]) first;
-        int[] castLast = (int[]) last;
+    private static Integer[] buildPotentialCandidate(Object first, Object last){
+        Integer[] castFirst = (Integer[]) first;
+        Integer[] castLast = (Integer[]) last;
 
-        int[] returnable = new int[castFirst.length+1];
+        Integer[] returnable = new Integer[castFirst.length+1];
         for(int i=0; i<castFirst.length; i++){
             returnable[i] = castFirst[i];
         }
@@ -81,12 +81,12 @@ public class CandidateGenerator {
      * @param potCan TreeSet of potential size k+1 candidates
      * @param l1 TreeMap of size k candidates
      */
-    private static void pruneCandidates(TreeSet<int[]> potCan, TreeMap<int[], Integer> l1){
+    private static void pruneCandidates(TreeSet<Integer[]> potCan, TreeMap<Integer[], Integer> l1){
         if(potCan.isEmpty()) return;
         if(potCan.first().length == 2) return;
-        ArrayList<int[]> cansToRemove = new ArrayList<>();
-        for(int[] can: potCan){
-            int[] subsetOfCan = Arrays.copyOfRange(can, 1, can.length);
+        ArrayList<Integer[]> cansToRemove = new ArrayList<>();
+        for(Integer[] can: potCan){
+            Integer[] subsetOfCan = Arrays.copyOfRange(can, 1, can.length);
             int excluded = can[0];
             for(int j=0; j<subsetOfCan.length-1; j++){
                 if(!l1.containsKey(subsetOfCan)) {
@@ -98,7 +98,7 @@ public class CandidateGenerator {
                 subsetOfCan[j] = temp;
             }
         }
-        for(int[] can: cansToRemove) potCan.remove(can);
+        for(Integer[] can: cansToRemove) potCan.remove(can);
     }
 
 
@@ -110,9 +110,9 @@ public class CandidateGenerator {
      */
     public static void main(String[] args) {
         System.out.println("Candidate Generator");
-        TreeMap<int[], Integer> candidates = parseFile(args[0]);
-        TreeMap<int[], Integer> newCandidates = CandidateGenerator.generate(candidates);
-        for(int[] candidate: newCandidates.keySet()){
+        TreeMap<Integer[], Integer> candidates = parseFile(args[0]);
+        TreeMap<Integer[], Integer> newCandidates = CandidateGenerator.generate(candidates);
+        for(Integer[] candidate: newCandidates.keySet()){
             for(int i: candidate) System.out.print(i + " ");
             System.out.print("\n");
         }
@@ -121,10 +121,10 @@ public class CandidateGenerator {
     /**
      * A helper method which parses the file into the correct data structure for candidate generation
      * @param inputFileName A string denoting the path to the correct file
-     * @return A TreeMap<int[], Integer> containing all of the potential candidates of size k. The Integer in the map is
+     * @return A TreeMap<Integer[], Integer> containing all of the potential candidates of size k. The Integer in the map is
      * not used in candidate generation but is there to play nicely with the Apriori section of code
      */
-    private static TreeMap<int[], Integer> parseFile(String inputFileName){
+    private static TreeMap<Integer[], Integer> parseFile(String inputFileName){
         Scanner reader = null;
         try{
             reader = new Scanner(new File(inputFileName));
@@ -133,16 +133,39 @@ public class CandidateGenerator {
             System.exit(1);
         }
 
-        TreeMap<int[], Integer> candidatePool = new TreeMap<>(new IntArrayComparatorItemWise());
+        TreeMap<Integer[], Integer> candidatePool = new TreeMap<>(new IntArrayComparatorItemWise());
         while(reader.hasNextLine()){
             String candidateData = reader.nextLine();
             String[] splitData = candidateData.split(" ");
-            int[] candidate = new int[splitData.length];
+            Integer[] candidate = new Integer[splitData.length];
             for(int i=0; i<candidate.length; i++){
                 candidate[i] = Integer.valueOf(splitData[i]);
             }
             candidatePool.put(candidate, 0);
         }
         return candidatePool;
+    }
+}
+
+class IntArrayComparatorItemWise implements Comparator<Integer[]> {
+
+    public IntArrayComparatorItemWise(){}
+
+    /**
+     * A comparator that compares two int arrays by the items inside. If one array of size k has items exactly equal to
+     * the first k items in an array of size >k, the larger array is determined to be greater.
+     * @param ints
+     * @param t1
+     * @return
+     */
+    @Override
+    public int compare(Integer[] ints, Integer[] t1) {
+        for(int i=0; i<ints.length && i<t1.length; i++){
+            if(ints[i] > t1[i]) return 1;
+            else if(ints[i] < t1[i]) return -1;
+        }
+        if(t1.length > ints.length) return -1;
+        else if(ints.length > t1.length) return 1;
+        else return 0;
     }
 }
